@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>滚动齿轮游戏</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div>分数: <span id="score">0</span></div>
+
+    <script>
+        // 获取画布和上下文
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 游戏变量
+        let angle = 0; // 初始角度
+        let score = 0; // 初始分数
+        const numTeeth = 60; // 齿数
+
+        // 绘制齿轮
+        function drawGear() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(angle * Math.PI / 180);
+            ctx.beginPath();
+            ctx.moveTo(100, 0);
+            for (let i = 0; i < numTeeth; i++) {
+                const theta = (i * 2 * Math.PI) / numTeeth;
+                ctx.lineTo(120 * Math.cos(theta), 120 * Math.sin(theta));
+                ctx.lineTo(100 * Math.cos(theta), 100 * Math.sin(theta));
+            }
+            ctx.closePath();
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // 更新分数
+        function updateScore() {
+            score = Math.floor((angle / 360) * numTeeth);
+            document.getElementById('score').textContent = score;
+        }
+
+        // 鼠标事件
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            let startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI;
+
+            const handleMouseMove = (e) => {
+                const currentAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI;
+                angle += currentAngle - startAngle;
+                startAngle = currentAngle;
+                drawGear();
+                updateScore();
+            };
+
+            const handleMouseUp = () => {
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+            };
+
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        });
+
+        // 初始化
+        drawGear();
+    </script>
+</body>
+</html>
